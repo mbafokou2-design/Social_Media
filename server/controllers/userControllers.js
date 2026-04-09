@@ -2,6 +2,11 @@ const HttpError = require("../models/errorModel")
 const User = require("../models/userModel")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const uuid = require("uuid").v4;
+const cloudinary = require("../utils/cloudinary")
+const fs = require("fs")
+const path = require("path");
+const { profile } = require("console");
 
 //====================== Register User ======================//
 // Post : /api/users/register
@@ -166,7 +171,35 @@ const followUnfollowUser = async (req, res, next) => {
 
 const changeUserAvatar = async (req, res, next) => {
     try {
-        res.json("change user avatar")
+        if(!req.files || !req.files.avatar){
+            return next(new HttpError("please choose an image", 422))
+        }
+        // Handle both single file and array of files
+        const avatar = Array.isArray(req.files.avatar) ? req.files.avatar[0] : req.files.avatar;
+        // check file size
+        if(avatar.size > 1024 * 1024){
+            return next(new HttpError("File size must be less than 1MB", 422))
+        }
+        let fileName = avatar.name;
+        if(!fileName) {
+            return next(new HttpError("Invalid file name", 422))
+        }
+        let splittedFilename = fileName.split('.')
+        let newFilename = splittedFilename[0] + "_" + uuid() + "." + splittedFilename[splittedFilename.length - 1]
+        avatar.mv(path.join(__dirname, "..","uploads", newFilename), async (err) => {
+            if(err){
+                return next(new HttpError(err))
+            }
+            // upload to cloudinary
+            const result = await cloudinary.uploader.upload(path.join(__dirname, "..","uploads", newFilename), 
+            {resource_type: "image"});
+                if(!result.secure_url){
+                    return next(new HttpError("could not upload image to cloudinary", 422))
+                }
+                // update user avatar
+                const updatedUser = await User.findByIdAndUpdate(req.user.id, {profilePhoto: result?.secure_url}, {new: true})
+            res.status(200).json({message: "Profile photo updated successfully", user: updatedUser})
+        })
     } catch (error) {  
         return next(new HttpError(error))
     }
