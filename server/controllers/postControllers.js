@@ -4,6 +4,7 @@ const userModel = require('../models/userModel')
 
 
 
+
 const {v4: uuid} = require('uuid')
 const cloudinary = require('../utils/cloudinary')
 const fs = require('fs')
@@ -59,15 +60,25 @@ const createPost = async (req, res, next) => {
 //protected
 const getPost = async (req, res, next) => {
     try {
-        const {id} = req.params;
+        const {id} = req.params
         const post = await postModel.findById(id)
-        if(!post) {
-            return next(new HttpError("Post not found", 404))
-        }
-        res.status(200).json(post)
+        // .populate("creator").populate({path: "comments", options: {sort: {createdAt: -1}}})
+        res.json(post)
     } catch (error) {
         return next(new HttpError(error))
     }
+}
+
+//Get all posts
+//Get /api/posts
+//protected
+const getPosts = async (req, res, next) => {
+    try{
+        const posts = await postModel.find().sort({createdAt: -1})
+        res.status(200).json(posts)
+    } catch (error) {
+        return next(new HttpError(error))
+    } 
 }
 
 
@@ -126,37 +137,23 @@ const createBookmark = async (req, res, next) => {
 
 
 
-
-
-
-
-const getPosts = async (req, res, next) => {
-    try {
-        const posts = await postModel.find().populate("creator", "-password").sort({createdAt: -1})
-        res.status(200).json(posts)
-    } catch (error) {
-        return next(new HttpError(error))
-    } 
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Update a new post
 //patch /api/posts/:id
 //protected
 const updatePost = async (req, res, next) => {
     try {
-        res.json("Update a post")
+        const postId = req.params.id;
+        const {body} = req.body;
+        // get post from the database
+        const post = await postModel.findById(postId);
+        //check if creator of the post is the same as the user making the request
+        if(post?.creator != req.user.id) {
+            return next(new HttpError("You are not authorized to update this post", 403))
+        }
+        //update post
+        const updatedPost = await postModel.findByIdAndUpdate(postId, {body}, {new: true})
+        res.json({message: "Post updated successfully", post: updatedPost})
+        res.json(updatedPost).status(200)
     } catch (error) {
         return next(new HttpError(error))
     }
@@ -171,7 +168,17 @@ const updatePost = async (req, res, next) => {
 //protected
 const deletePost = async (req, res, next) => {
     try {
-        res.json("Delete a post")
+        const postId = req.params.id;
+        // get post from the database
+        const post = await postModel.findById(postId);
+        //check if creator of the post is the same as the user making the request
+        if(post?.creator != req.user.id) {
+            return next(new HttpError("You are not authorized to delete this post", 403))
+        }
+        // delete post
+        const deletedPost = await postModel.findByIdAndDelete(postId)
+        res.json({message: "Post deleted successfully", post: deletedPost})
+        res.json(deletedPost).status(200)
     } catch (error) {
         return next(new HttpError(error))
     }
@@ -190,7 +197,9 @@ const deletePost = async (req, res, next) => {
 //protected
 const getFollowingPosts = async (req, res, next) => {
     try {
-        res.json("Get following posts")
+        const user = await userModel.findById(req.user.id)
+        const posts = await postModel.find({creator: {$in: user.following}})
+        res.json(posts)
     } catch (error) {
         return next(new HttpError(error))
     }
