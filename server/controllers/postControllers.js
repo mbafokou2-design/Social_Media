@@ -97,11 +97,14 @@ const getPosts = async (req, res, next) => {
 //protected
 const getUserBookmarks = async (req, res, next) => {
     try {
-        res.json("Get bookmark posts")
+        const user = await userModel.findById(req.user.id)
+            .populate({ path: "bookmarks", options: { sort: { createdAt: -1 } } });
+
+        res.status(200).json(user.bookmarks); // ✅ only bookmarks
     } catch (error) {
-        return next(new HttpError(error))
-    } 
-}
+        return next(new HttpError(error));
+    }
+};
 
 
 
@@ -125,12 +128,44 @@ const getUserBookmarks = async (req, res, next) => {
 //protected
 const createBookmark = async (req, res, next) => {
     try {
-        res.json("Create bookmark post")
-    } catch (error) {
-        return next(new HttpError(error))
-    } 
-}
+        const postId = req.params.id;
 
+        const user = await userModel.findById(req.user.id);
+
+        const postIsBookmarked = user?.bookmarks?.includes(postId);
+
+        let updatedUser;
+
+        if (postIsBookmarked) {
+            updatedUser = await userModel.findByIdAndUpdate(
+                req.user.id,
+                { $pull: { bookmarks: postId } },
+                { new: true }
+            );
+        } else {
+            updatedUser = await userModel.findByIdAndUpdate(
+                req.user.id,
+                { $push: { bookmarks: postId } },
+                { new: true }
+            );
+        }
+
+        // 🔥 Populate bookmarks before sending
+        const populatedUser = await userModel
+            .findById(updatedUser._id)
+            .populate({ path: "bookmarks", options: { sort: { createdAt: -1 } } });
+
+        res.status(200).json({
+            message: postIsBookmarked
+                ? "Post removed from bookmarks"
+                : "Post added to bookmarks",
+            bookmarks: populatedUser.bookmarks
+        });
+
+    } catch (error) {
+        return next(new HttpError(error));
+    }
+};
 
 
 
@@ -177,6 +212,7 @@ const deletePost = async (req, res, next) => {
         }
         // delete post
         const deletedPost = await postModel.findByIdAndDelete(postId)
+        await userModel.findByIdAndUpdate(req.user.id, {$pull: {posts: postId}}) // remove post from user's posts array
         res.json({message: "Post deleted successfully", post: deletedPost})
         res.json(deletedPost).status(200)
     } catch (error) {
@@ -214,7 +250,15 @@ const getFollowingPosts = async (req, res, next) => {
 //protected
 const likeDislikePost = async (req, res, next) => {
     try {
-        res.json("Like or dislike a post")
+        const {id} = req.params
+        const post = await postModel.findById(id)
+        let updatedPost;
+        if(post?.likes.includes(req.user.id)) {
+            updatedPost = await postModel.findByIdAndUpdate(id, {$pull: {likes: req.user.id}}, {new: true})
+        } else {
+            updatedPost = await postModel.findByIdAndUpdate(id, {$push: {likes: req.user.id}}, {new: true})
+        }
+        res.status(200).json(updatedPost)
     } catch (error) {
         return next(new HttpError(error))
     }
@@ -228,7 +272,9 @@ const likeDislikePost = async (req, res, next) => {
 //protected
 const getUserPosts = async (req, res, next) => {
     try {
-        res.json("Get user posts")
+        const userId = req.params.id;
+        const posts = await postModel.find({creator: userId}).sort({createdAt: -1})
+        res.json(posts)
     } catch (error) {
         return next(new HttpError(error))
     }
