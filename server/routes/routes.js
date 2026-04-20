@@ -46,6 +46,6 @@ const {createComment, getPostComments, deleteComment} = require("../controllers/
 //====================== Comment Routes ======================//
  router.post('/comments/:postId', authMiddleware, createComment)
  router.get('/comments/:postId', authMiddleware, getPostComments)
- router.delete('/comments/:postId', authMiddleware, deleteComment)
+ router.delete('/comments/:commentId', authMiddleware, deleteComment)
 
  module.exports = router; 
