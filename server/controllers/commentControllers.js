@@ -2,7 +2,7 @@ const HttpError = require('../models/errorModel')
 const commentModel = require('../models/commentModel')
 const postModel = require('../models/postModel')
 const userModel = require('../models/userModel');
-const { post, options } = require('../routes/routes');
+// ❌ DELETE this line → const { post, options } = require('../routes/routes');
 
 
 // Create comment
