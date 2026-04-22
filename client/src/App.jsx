@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import RootLayout from './RootLayout'
 import ErrorPage from './pages/ErrorPage'
 import Home from './pages/Home'
@@ -15,24 +16,39 @@ import { Provider } from 'react-redux'
 import store from './store/store'
 
 const router = createBrowserRouter([
-    {path: '/', element: <RootLayout/> ,errorElement: <ErrorPage />, children: [
-      {index: true, element: <Home />},
-      {path: "messages", element: <MessagesList />},
-      {path: "messages/:receiverId", element: <Messages/>},
-      {path: "bookmarks", element: <Bookmarks />},
-      {path: "users/:id", element: <Profile />},
-      {path: "post/:id", element: <SinglePost />},
+    { path: '/', element: <RootLayout />, errorElement: <ErrorPage />, children: [
+        { index: true, element: <Home /> },
+        { path: "messages", element: <MessagesList /> },
+        { path: "messages/:receiverId", element: <Messages /> },
+        { path: "bookmarks", element: <Bookmarks /> },
+        { path: "users/:id", element: <Profile /> },
+        { path: "post/:id", element: <SinglePost /> },
     ]},
-    {path: "/login", element: <Login />},
-    {path: "/register", element: <Register />},
-    {path: "/logout", element: <Logout/>},
+    { path: "/login", element: <Login /> },
+    { path: "/register", element: <Register /> },
+    { path: "/logout", element: <Logout /> },
 ])
-const App = ()=> {
 
+// ✅ separate component so we can use useSelector inside Provider
+const AppContent = () => {
+    const theme = useSelector(state => state?.ui?.theme)
+
+    useEffect(() => {
+        // ✅ remove all old theme classes
+        document.body.classList.remove("dark", "red", "blue", "yellow", "green", "purple")
+        // ✅ apply new ones
+        if (theme?.backgroundColor) document.body.classList.add(theme.backgroundColor)
+        if (theme?.primaryColor) document.body.classList.add(theme.primaryColor)
+    }, [theme])
+
+    return <RouterProvider router={router} />
+}
+
+const App = () => {
     return (
-      <Provider store={store}>
-        <RouterProvider router={router} />
-      </Provider>
+        <Provider store={store}>
+            <AppContent />
+        </Provider>
     )
 }
 
