@@ -12,14 +12,14 @@ const CreatePost = ({ onCreatePost, error }) => {  // ✅ destructured correctly
     const createPost = (e) => {
         e.preventDefault();
 
-        if (!image) {
-            return; // ✅ don't submit if no image selected
-        }
+        if (!image) return;
 
         const postData = new FormData();
-        postData.set('body', body);
-        postData.set('image', image);
+        postData.append('body', body);
+        postData.append('image', image); // MUST match req.files.image
+
         onCreatePost(postData);
+
         setBody("")
         setImage(null)
     }

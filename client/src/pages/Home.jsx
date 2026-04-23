@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import CreatePost from '../components/CreatePost'
 import axios from 'axios'
 import Feeds from '../components/Feeds'
+import FeedSkeleton from '../components/FeedSkeleton'
 
 const Home = () => {
     const [posts, setPosts] = useState([])
@@ -43,7 +44,7 @@ const Home = () => {
     return (
         <section className='mainArea'>
             <CreatePost onCreatePost={createPost} error={error} />
-            <Feeds posts={posts} onSetPosts={setPosts} />
+            {isLoading ? <FeedSkeleton /> : <Feeds posts={posts} onSetPosts={setPosts} />}
         </section>
     )
 }

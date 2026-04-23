@@ -9,6 +9,8 @@ import { IoMdShare } from 'react-icons/io'
 import { BsThreeDots } from 'react-icons/bs'
 import LikeDislikePost from './LikeDislikePost'  // ✅ fixed import
 import { uiSliceActions } from '../store/ui-slice'
+import TrimText from '../helpers/TrimText'
+import BookmarkPost from './BookmarkPost'
 
 const Feed = ({ post, onSetPosts }) => {
     const [creator, setCreator] = useState({})
@@ -68,7 +70,7 @@ const Feed = ({ post, onSetPosts }) => {
                 )}
             </header>
             <Link to={`/post/${post?._id}`} className='feed__body'>
-                <p>{post?.body}</p>
+                <p><TrimText item={post?.body} maxLength={160} /></p>  {/* ✅ props inside the tag */}
                 {post?.image && (
                     <div className="feed__images">
                         <img src={post?.image} alt="" />
@@ -86,6 +88,7 @@ const Feed = ({ post, onSetPosts }) => {
                         <IoMdShare />
                     </button>
                 </div>
+                <BookmarkPost post={post} />
             </footer>
         </article>
     )

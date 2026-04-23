@@ -757,7 +757,7 @@ SINGLE POST
 ==========================================================*/
 .singlePost {
   margin-bottom: 3rem;
-  /* background: var(--color-gray-0); */
+  background: var(--color-gray-0);
   border-radius: var(--radius-3);
   padding: 1rem;
 }
@@ -765,6 +765,12 @@ SINGLE POST
 .singlePost .feed__header {
   justify-content: start;
   gap: 1rem;
+}
+
+.singlePost .feed__header a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .singlePost .feed__header div {
