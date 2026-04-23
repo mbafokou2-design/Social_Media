@@ -76,8 +76,9 @@ const loginUser = async (req, res, next) => {
         res.status(200).json({
             token,
             id: user?._id,
-            profilePhoto: user?.profilePhoto,  // ✅ added
-            fullname: user?.fullname           // ✅ useful for displaying username in UI
+            profilePhoto: user?.profilePhoto,
+            fullname: user?.fullname,
+            bookmarks: user?.bookmarks  // ✅ add this
         })
 
     } catch (error) {
@@ -98,7 +99,7 @@ const loginUser = async (req, res, next) => {
 const getUser = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const user = await User.findById(id)
+        const user = await User.findById(id).select("-password")
         if (!user) {
             return next(new HttpError("User not found", 404))
         }
