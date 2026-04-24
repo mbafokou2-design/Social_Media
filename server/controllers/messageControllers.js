@@ -86,21 +86,31 @@ const getMessages = async (req, res, next) => {
 //get : api/conversations
 //protected
 const getConversation = async (req, res, next) => {
-    try{
+    try {
+        if (!req.user || !req.user.id) {
+            return next(new HttpError("Unauthorized", 401));
+        }
+
         let conversations = await ConversationModel.find({
-            participants: req.user.id}).populate({path: "participants", select: "fullname profilePhoto"}).
-            sort({createdAt: -1});
-            //remove the logged in user from the participants array
-            conversations.forEach((conversation) => {
-                conversation.participants = 
-                conversation.participants.filter(participant => participant._id.toString() !== req.user.id.toString()
-              );
-            });
-            res.json(conversations)
-    } catch(error) {
-        return next(new HttpError(error))
+            participants: { $in: [req.user.id] }
+        })
+        .populate({ path: "participants", select: "fullname profilePhoto" })
+        .sort({ createdAt: -1 });
+
+        conversations = conversations.map(conv => {
+            const obj = conv.toObject();
+            obj.participants = obj.participants.filter(
+                p => p._id.toString() !== req.user.id.toString()
+            );
+            return obj;
+        });
+
+        res.json(conversations);
+
+    } catch (error) {
+        return next(new HttpError(error.message || "Server error", 500));
     }
-}
+};
 
 
 module.exports = {
