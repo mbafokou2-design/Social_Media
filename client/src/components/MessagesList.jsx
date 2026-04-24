@@ -1,10 +1,42 @@
-import React from 'react'
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import MessageListItem from './MessageListItem'
 
-const MessagesList = ()=> {
+const MessagesList = () => {
+    const [conversations, setConversations] = useState([])
+    const token = useSelector(state => state?.user?.currentUser?.token)
+    const socket = useSelector(state => state?.user?.currentUser?.socket)
+
+    //get chats from db
+    const getConversations = async () => {
+        try {
+            const response = axios.get(`${import.meta.env.VITE_API_URL}/conversations`, {
+                withCredentials: true,
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            setConversations(response?.data)
+
+        } catch (error) {
+            console.log(error)
+        }
+
+    }
+    useEffect(() => {
+        getConversations()
+    }, [socket])
+
+
     return (
-        <div>
-            <h1>Messages</h1>
-        </div>
+        <menu className='messageList'>
+            <h3>Recent Messages</h3>
+            {
+                conversations?.map(conversation => <MessageListItem key={conversation?._id}
+                    conversation={conversation} />)
+            }
+        </menu>
+
+
     )
 }
 

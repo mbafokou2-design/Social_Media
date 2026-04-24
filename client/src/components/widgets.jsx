@@ -1,10 +1,13 @@
 import React from 'react'
+import FriendRequests from './FriendRequests'
+import MessagesList from './MessagesList'
 
 const Widgets = ()=> {
     return (
-        <div>
-            <h1>Widgets</h1>
-        </div>
+        <section className='widgets'>
+            <FriendRequests />
+            <MessagesList />
+        </section>
     )
 }
 

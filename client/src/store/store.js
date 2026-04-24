@@ -1,13 +1,14 @@
-import { configureStore } from "@reduxjs/toolkit";
-import uiSlice from "./ui-slice";
-import userSlice from "./user-slice";
-
-
+import { configureStore } from "@reduxjs/toolkit"
+import userSlice from "./user-slice"
+import uiSlice from "./ui-slice"
+import postsSlice from "./posts-slice"  // ✅ added
 
 const store = configureStore({
-    reducer: {ui: uiSlice.reducer,
-        user: userSlice.reducer
+    reducer: {
+        user: userSlice.reducer,
+        ui: uiSlice.reducer,
+        posts: postsSlice.reducer  // ✅ added
     }
 })
 
-export default store;
+export default store

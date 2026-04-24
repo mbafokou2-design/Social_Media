@@ -1,38 +1,38 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import Widgets from './components/Widgets'
 import ThemeModal from './components/ThemeModal'
+import EditPost from './components/EditPost'
+import EditProfile from './components/EditProfile'
 import { useSelector } from 'react-redux'
-import { useEffect } from 'react'
 
 const RootLayout = () => {
     const themeModalIsOpen = useSelector(state => state?.ui?.themeModalIsOpen)
-    const theme = useSelector(state => state?.ui?.theme)  // ✅ get theme
-
+    const editPostModalOpen = useSelector(state => state?.ui?.editPostModalOpen)
+    const editProfileModalOpen = useSelector(state => state?.ui?.editProfileModalOpen)
+    const theme = useSelector(state => state?.ui?.theme)
 
     useEffect(() => {
-        // remove old classes first
-        document.body.classList.remove("dark")
-        // apply new background class
-        if (theme?.backgroundColor) {
-            document.body.classList.add(theme.backgroundColor)
-        }
-    }, [theme?.backgroundColor])
+        document.body.classList.remove("dark", "red", "blue", "yellow", "green", "purple")
+        if (theme?.backgroundColor) document.body.classList.add(theme.backgroundColor)
+        if (theme?.primaryColor) document.body.classList.add(theme.primaryColor)
+    }, [theme])
 
     return (
-        // ✅ apply primaryColor and backgroundColor as classes to body wrapper
-        <div className={`${theme?.primaryColor} ${theme?.backgroundColor}`}>
+        <div>
             <Navbar />
             <main className='main'>
                 <div className="container main__container">
                     <Sidebar />
                     <Outlet />
                     <Widgets />
-                    {themeModalIsOpen && <ThemeModal />}
                 </div>
             </main>
+            {themeModalIsOpen && <ThemeModal />}
+            {editPostModalOpen && <EditPost />}
+            {editProfileModalOpen && <EditProfile />} 
         </div>
     )
 }
