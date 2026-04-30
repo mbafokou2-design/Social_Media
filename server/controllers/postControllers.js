@@ -15,42 +15,50 @@ const path = require('path')
 //protected
 const createPost = async (req, res, next) => {
     try {
-        const {body} = req.body;
-        if(!body) {
-            return next(new HttpError("Fill in text field and choose image", 422))
+        const { body } = req.body;
+
+        if (!body) {
+            return next(new HttpError("Fill in text field and choose image", 422));
         }
-        if(!req.files || !req.files.image) {
-            return next(new HttpError("please choose an image", 422))
-        } else {
-            const {image} = req.files
-            //image should be less than 2mb 
-            if(image.size > 2000000) {
-                return next(new HttpError("Image should be less than 2mb", 422))
-            }
-            // rename image
-            let fileName = image.name;
-            fileName = fileName.split(".");
-            fileName = fileName[0] + uuid() +  "." + fileName[fileName.length - 1]
-            image.mv(path.join(__dirname,'..', 'uploads', fileName), async (err) => {
-                if(err) {
-                    return next(new HttpError(err))
-                }
-                //store image on cloudinary
-                const result = await cloudinary.uploader.upload(path.join(__dirname,'..', 'uploads', fileName), {
-                    resource_type: "image"})
-                    if(!result.secure_url) {
-                        return next(new HttpError("Error uploading image to Cloudinary", 422))
-                    } 
-                    //save post to database
-                    const newPost = await postModel.create({creator: req.user.id, body, image: result.secure_url})
-                    await userModel.findByIdAndUpdate(req.user.id, {$push: {posts: newPost._id}}) // add post to user's posts array
-                    res.status(201).json({message: "Post created successfully", post: newPost}) 
-            })
+
+        if (!req.files || !req.files.image) {
+            return next(new HttpError("please choose an image", 422));
         }
+
+        const image = req.files.image;
+
+        if (image.size > 2000000) {
+            return next(new HttpError("Image should be less than 2mb", 422));
+        }
+
+        // 🚀 upload directly to Cloudinary (NO local save)
+        const result = await cloudinary.uploader.upload(image.tempFilePath, {
+            resource_type: "image"
+        });
+
+        if (!result.secure_url) {
+            return next(new HttpError("Error uploading image to Cloudinary", 422));
+        }
+
+        const newPost = await postModel.create({
+            creator: req.user.id,
+            body,
+            image: result.secure_url
+        });
+
+        await userModel.findByIdAndUpdate(req.user.id, {
+            $push: { posts: newPost._id }
+        });
+
+        res.status(201).json({
+            message: "Post created successfully",
+            post: newPost
+        });
+
     } catch (error) {
-        return next(new HttpError(error))
+        return next(new HttpError(error));
     }
-}
+};
 
 
 
