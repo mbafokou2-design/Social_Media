@@ -16,6 +16,9 @@ app.use(upload({ useTempFiles: true, tempFileDir: os.tmpdir() }))
 
 app.use('/api', routes);
 
+app.get("/", (req, res) => {
+  res.send("API is running 🚀");
+});
 app.use(notFound);
 app.use(errorHandler);
 
