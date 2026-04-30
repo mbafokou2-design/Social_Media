@@ -8,10 +8,9 @@ const MessagesList = () => {
     const token = useSelector(state => state?.user?.currentUser?.token)
     const socket = useSelector(state => state?.user?.currentUser?.socket)
 
-    //get chats from db
     const getConversations = async () => {
         try {
-            const response = axios.get(`${import.meta.env.VITE_API_URL}/conversations`, {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/conversations`, {
                 withCredentials: true,
                 headers: { Authorization: `Bearer ${token}` }
             })
@@ -20,23 +19,24 @@ const MessagesList = () => {
         } catch (error) {
             console.log(error)
         }
-
     }
+
     useEffect(() => {
         getConversations()
     }, [socket])
-
 
     return (
         <menu className='messageList'>
             <h3>Recent Messages</h3>
             {
-                conversations?.map(conversation => <MessageListItem key={conversation?._id}
-                    conversation={conversation} />)
+                conversations?.map(conversation => (
+                    <MessageListItem 
+                        key={conversation?._id}
+                        conversation={conversation} 
+                    />
+                ))
             }
         </menu>
-
-
     )
 }
 

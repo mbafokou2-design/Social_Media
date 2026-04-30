@@ -20,6 +20,26 @@ const RootLayout = () => {
         if (theme?.primaryColor) document.body.classList.add(theme.primaryColor)
     }, [theme])
 
+    useEffect(() => {
+        const sidebar = document.querySelector('.sidebar')
+        if (!sidebar) return
+
+        let lastScrollY = window.scrollY
+
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY
+            if (currentScrollY > lastScrollY && currentScrollY > 80) {
+                sidebar.classList.add('hidden')    // scrolling down → hide
+            } else {
+                sidebar.classList.remove('hidden') // scrolling up → show
+            }
+            lastScrollY = currentScrollY
+        }
+
+        window.addEventListener('scroll', handleScroll, { passive: true })
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
+
     return (
         <div>
             <Navbar />
@@ -32,7 +52,7 @@ const RootLayout = () => {
             </main>
             {themeModalIsOpen && <ThemeModal />}
             {editPostModalOpen && <EditPost />}
-            {editProfileModalOpen && <EditProfile />} 
+            {editProfileModalOpen && <EditProfile />}
         </div>
     )
 }

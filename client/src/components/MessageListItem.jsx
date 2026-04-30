@@ -5,17 +5,18 @@ import ProfileImage from './Profileimage'
 import TrimText from '../helpers/TrimText'
 import TimeAgo from 'react-timeago'
 
-
-const MessageListItem = ({conversation})=> {
+const MessageListItem = ({ conversation }) => {
     const onlineUsers = useSelector(state => state?.user?.onlineUsers)
 
     return (
         <Link to={`/messages/${conversation?.participants[0]?._id}`} className='messageList__item'>
-            <ProfileImage image={conversation?.participants[0]?. profilePhoto} 
-            className={onlineUsers?.includes(conversation?.participants[0]?._) ? "active" : ""}/>
+            <ProfileImage 
+                image={conversation?.participants[0]?.profilePhoto} 
+                className={onlineUsers?.includes(conversation?.participants[0]?._id) ? "active" : ""}
+            />
             <div className="messageList__item-details">
                 <h5>{conversation?.participants[0]?.fullname}</h5>
-                <p><TrimText item={conversation?.lastMessage?.text} maxLength={16} /></p>
+                <p><TrimText item={conversation?.LastMessage?.text} maxLength={16} /></p>
                 <small><TimeAgo date={conversation?.createdAt} /></small>
             </div>
         </Link>

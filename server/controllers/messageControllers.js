@@ -65,7 +65,9 @@ const getMessages = async (req, res, next) => {
        if(!conversation) {
         return next(new HttpError("you have no conversation with this user", 404))
        }
-       const messages = await MessageModel.find({ conversationId: conversation._id}).sort({ createdAt: 1 })
+       const messages = await MessageModel.find({ conversationId: conversation._id })
+    .populate({ path: "senderId", select: "fullname profilePhoto" })  // ← add this
+    .sort({ createdAt: 1 })
        res.json(messages)
 
     } catch(error) {
