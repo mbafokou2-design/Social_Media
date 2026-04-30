@@ -57,4 +57,8 @@ const {createMessage, getMessages, getConversation} = require("../controllers/me
  router.post('/messages/:receiverId', authMiddleware,  createMessage)
  router.get('/messages/:receiverId', authMiddleware, getMessages)
  router.get('/conversations', authMiddleware, getConversation)
+
+
+
+ 
  module.exports = router;
