@@ -11,7 +11,13 @@ const {server, app} = require("./socket/socket")
 
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
-app.use(cors({credentials: true, origin: ["http://localhost:5173"]}))
+app.use(cors({
+  credentials: true,
+  origin: [
+    "http://localhost:5173",
+    "https://social-media-hp7c.vercel.app"
+  ]
+}));
 app.use(upload({ useTempFiles: true, tempFileDir: os.tmpdir() }))
 
 app.use('/api', routes);
